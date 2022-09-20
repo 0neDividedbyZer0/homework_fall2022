@@ -42,6 +42,11 @@ class PGAgent(BaseAgent):
         # TODO: update the PG actor/policy using the given batch of data 
         # using helper functions to compute qvals and advantages, and
         # return the train_log obtained from updating the policy
+        q_vals = self.calculate_q_vals(rewards_list)
+        advantages = self.estimate_advantage(observations, rewards_list, q_vals, terminals)
+
+
+        train_log = self.actor.update(observations, actions, advantages, q_vals)
 
         return train_log
 
@@ -67,14 +72,17 @@ class PGAgent(BaseAgent):
         # Note: q_values should be a 2D numpy array where the first
         # dimension corresponds to trajectories and the second corresponds
         # to timesteps
-
+        q_values = []
         if not self.reward_to_go:
-            TODO
+            for tau in rewards_list:
+                q_values.append(self._discounted_return(tau))
+
 
         # Case 2: reward-to-go PG
         # Estimate Q^{pi}(s_t, a_t) by the discounted sum of rewards starting from t
         else:
-            TODO
+            for tau in rewards_list:
+                q_values.append(self._discounted_cumsum(tau))
 
         return q_values
 
@@ -114,6 +122,7 @@ class PGAgent(BaseAgent):
                     ## HINT: use terminals to handle edge cases. terminals[i]
                         ## is 1 if the state is the last in its trajectory, and
                         ## 0 otherwise.
+                    pass
 
                 # remove dummy advantage
                 advantages = advantages[:-1]
@@ -154,8 +163,13 @@ class PGAgent(BaseAgent):
 
             Output: list where each index t contains sum_{t'=0}^T gamma^t' r_{t'}
         """
+        rewards = np.asarray(rewards)
+        discounts = np.logspace(0, rewards.shape, num=rewards.shape + 1, base=self.gamma)
+        reward =  np.sum(rewards * discounts)
+        output = np.zeros(rewards.shape)
+        output[:] = reward
 
-        return list_of_discounted_returns
+        return output.tolist()
 
     def _discounted_cumsum(self, rewards):
         """
@@ -163,5 +177,8 @@ class PGAgent(BaseAgent):
             -takes a list of rewards {r_0, r_1, ..., r_t', ... r_T},
             -and returns a list where the entry in each index t' is sum_{t'=t}^T gamma^(t'-t) * r_{t'}
         """
-
-        return list_of_discounted_cumsums
+        rewards = np.asarray(rewards)
+        discounts = np.logspace(0, rewards.shape, num=rewards.shape + 1, base=self.gamma)
+        values = np.flip(rewards * discounts)
+        output = np.flip(np.cumsum(values) / np.flip(discounts))
+        return output.tolist()

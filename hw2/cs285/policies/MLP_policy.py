@@ -86,7 +86,14 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     # query the policy with observation(s) to get selected action(s)
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        # TODO: get this from HW1
+        if len(obs.shape) > 1:
+            observation = obs
+        else:
+            observation = obs[None]
+
+        # TODO return the action that the policy prescribes
+        obs = torch.from_numpy(obs).to(ptu.device)
+        return self.forward(obs.float()).mean.cpu().detach().numpy()
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -134,7 +141,14 @@ class MLPPolicyPG(MLPPolicy):
         # HINT2: you will want to use the `log_prob` method on the distribution returned
             # by the `forward` method
 
-        TODO
+        pi = self.forward(observations)
+        log_probs = pi.log_prob(actions)
+        log_probs = log_probs.sum(1)
+        loss = - torch.sum(log_probs * advantages)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
 
         if self.nn_baseline:
             ## TODO: update the neural network baseline using the q_values as
@@ -144,7 +158,8 @@ class MLPPolicyPG(MLPPolicy):
             ## Note: You will need to convert the targets into a tensor using
                 ## ptu.from_numpy before using it in the loss
 
-            TODO
+            # TODO
+            pass
 
         train_log = {
             'Training Loss': ptu.to_numpy(loss),
