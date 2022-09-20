@@ -38,7 +38,6 @@ class PGAgent(BaseAgent):
             Training a PG agent refers to updating its actor using the given observations/actions
             and the calculated qvals/advantages that come from the seen rewards.
         """
-
         # TODO: update the PG actor/policy using the given batch of data 
         # using helper functions to compute qvals and advantages, and
         # return the train_log obtained from updating the policy
@@ -84,7 +83,7 @@ class PGAgent(BaseAgent):
             for tau in rewards_list:
                 q_values.append(self._discounted_cumsum(tau))
 
-        return q_values
+        return np.concatenate(q_values)
 
     def estimate_advantage(self, obs: np.ndarray, rews_list: np.ndarray, q_values: np.ndarray, terminals: np.ndarray):
 
@@ -138,7 +137,7 @@ class PGAgent(BaseAgent):
         # Normalize the resulting advantages to have a mean of zero
         # and a standard deviation of one
         if self.standardize_advantages:
-            advantages = TODO
+            advantages = (advantages - np.mean(advantages)) / (1e-8 + np.std(advantages))
 
         return advantages
 
@@ -164,7 +163,7 @@ class PGAgent(BaseAgent):
             Output: list where each index t contains sum_{t'=0}^T gamma^t' r_{t'}
         """
         rewards = np.asarray(rewards)
-        discounts = np.logspace(0, rewards.shape, num=rewards.shape + 1, base=self.gamma)
+        discounts = np.logspace(0, rewards.shape[0], num=rewards.shape[0], base=self.gamma)
         reward =  np.sum(rewards * discounts)
         output = np.zeros(rewards.shape)
         output[:] = reward
@@ -178,7 +177,8 @@ class PGAgent(BaseAgent):
             -and returns a list where the entry in each index t' is sum_{t'=t}^T gamma^(t'-t) * r_{t'}
         """
         rewards = np.asarray(rewards)
-        discounts = np.logspace(0, rewards.shape, num=rewards.shape + 1, base=self.gamma)
+        discounts = np.logspace(0, rewards.shape[0], num=rewards.shape[0], base=self.gamma)
         values = np.flip(rewards * discounts)
         output = np.flip(np.cumsum(values) / np.flip(discounts))
+
         return output.tolist()

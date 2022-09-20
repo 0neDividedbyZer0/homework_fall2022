@@ -1,3 +1,8 @@
+import sys
+ 
+# setting path
+sys.path.append('../cs285')
+
 import os
 import time
 

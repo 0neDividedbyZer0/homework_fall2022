@@ -93,7 +93,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
         # TODO return the action that the policy prescribes
         obs = torch.from_numpy(obs).to(ptu.device)
-        return self.forward(obs.float()).mean.cpu().detach().numpy()
+        dist = self.forward(obs)
+        #if self.discrete:
+        #    return dist.probs.argmax().cpu().detach().numpy()
+        #else:
+        return dist.sample().cpu().detach().numpy()
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -143,7 +147,6 @@ class MLPPolicyPG(MLPPolicy):
 
         pi = self.forward(observations)
         log_probs = pi.log_prob(actions)
-        log_probs = log_probs.sum(1)
         loss = - torch.sum(log_probs * advantages)
 
         self.optimizer.zero_grad()
