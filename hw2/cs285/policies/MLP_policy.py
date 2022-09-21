@@ -97,7 +97,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         #if self.discrete:
         #    return dist.probs.argmax().cpu().detach().numpy()
         #else:
-        return torch.flatten(dist.sample().cpu().detach()).numpy()
+        return dist.sample().cpu().detach().squeeze().numpy()
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -157,15 +157,21 @@ class MLPPolicyPG(MLPPolicy):
             ## TODO: update the neural network baseline using the q_values as
             ## targets. The q_values should first be normalized to have a mean
             ## of zero and a standard deviation of one.
-
+            y = (q_values - np.mean(q_values)) / (1e-8 + np.std(q_values))
             ## Note: You will need to convert the targets into a tensor using
                 ## ptu.from_numpy before using it in the loss
 
-            # TODO
-            pass
+            y = ptu.from_numpy(y)
+            y_hat = self.baseline(observations).squeeze()
+            baseline_loss = F.mse_loss(y_hat, y)
+
+            self.baseline_optimizer.zero_grad()
+            baseline_loss.backward()
+            self.baseline_optimizer.step()
 
         train_log = {
             'Training Loss': ptu.to_numpy(loss),
+            'Baseline Loss': ptu.to_numpy(baseline_loss)
         }
         return train_log
 
