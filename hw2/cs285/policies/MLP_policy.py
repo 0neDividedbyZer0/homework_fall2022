@@ -97,7 +97,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         #if self.discrete:
         #    return dist.probs.argmax().cpu().detach().numpy()
         #else:
-        return dist.sample().cpu().detach().numpy()
+        return torch.flatten(dist.sample().cpu().detach()).numpy()
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -114,7 +114,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             action_distribution = distributions.Categorical(logits=logits)
             return action_distribution
         else:
-            batch_mean = self.mean_net(observation)
+            batch_mean = self.mean_net(observation.float())
             scale_tril = torch.diag(torch.exp(self.logstd))
             batch_dim = batch_mean.shape[0]
             batch_scale_tril = scale_tril.repeat(batch_dim, 1, 1)
