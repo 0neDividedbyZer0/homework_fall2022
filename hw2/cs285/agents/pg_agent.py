@@ -121,7 +121,10 @@ class PGAgent(BaseAgent):
                     ## HINT: use terminals to handle edge cases. terminals[i]
                         ## is 1 if the state is the last in its trajectory, and
                         ## 0 otherwise.
-                    pass
+                    if terminals[i]==1:
+                        advantages[i] = rews[i] - values[i]
+                    else:
+                        advantages[i] = rews[i] + self.gamma * values[i+1] - values[i] + self.gamma * self.gae_lambda * advantages[i+1]
 
                 # remove dummy advantage
                 advantages = advantages[:-1]
