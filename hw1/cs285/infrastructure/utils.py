@@ -11,7 +11,7 @@ MJ_ENV_KWARGS["Ant-v4"]["use_contact_forces"] = True
 def sample_trajectory(env, policy, max_path_length, render=False):
 
     # initialize env for the beginning of a new rollout
-    ob = TODO # HINT: should be the output of resetting the env
+    ob = env.reset() # HINT: should be the output of resetting the env
 
     # init vars
     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
@@ -27,8 +27,7 @@ def sample_trajectory(env, policy, max_path_length, render=False):
 
         # use the most recent ob to decide what to do
         obs.append(ob)
-        ac = TODO # HINT: query the policy's get_action function
-        ac = ac[0]
+        ac = policy.get_action(ob) # HINT: query the policy's get_action function
         acs.append(ac)
 
         # take that action and record results
@@ -41,7 +40,10 @@ def sample_trajectory(env, policy, max_path_length, render=False):
 
         # TODO end the rollout if the rollout ended
         # HINT: rollout can end due to done, or due to max_path_length
-        rollout_done = TODO # HINT: this is either 0 or 1
+        if steps < max_path_length:
+            rollout_done = done
+        else:
+            rollout_done = 1
         terminals.append(rollout_done)
 
         if rollout_done:
@@ -60,8 +62,9 @@ def sample_trajectories(env, policy, min_timesteps_per_batch, max_path_length, r
     timesteps_this_batch = 0
     paths = []
     while timesteps_this_batch < min_timesteps_per_batch:
-
-        TODO
+        path = sample_trajectory(env, policy, max_path_length, render)
+        paths.append(path)
+        timesteps_this_batch += get_pathlength(path)
 
     return paths, timesteps_this_batch
 
@@ -74,7 +77,9 @@ def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False):
     """
     paths = []
 
-    TODO
+    for i in range(ntraj):
+        path = sample_trajectory(env, policy, max_path_length, render)
+        paths.append(path)
 
     return paths
 
@@ -88,6 +93,7 @@ def Path(obs, image_obs, acs, rewards, next_obs, terminals):
     """
     if image_obs != []:
         image_obs = np.stack(image_obs, axis=0)
+        print(image_obs)
     return {"observation" : np.array(obs, dtype=np.float32),
             "image_obs" : np.array(image_obs, dtype=np.uint8),
             "reward" : np.array(rewards, dtype=np.float32),
