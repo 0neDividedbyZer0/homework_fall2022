@@ -1,3 +1,9 @@
+import sys
+ 
+# setting path
+sys.path.append('C:\\Users\\scien\\OneDrive\\Desktop\\fa2022\\cs285\\homework_fall2022\\hw3')
+sys.path = sys.path[:6] + sys.path[7:]
+
 import os
 import time
 

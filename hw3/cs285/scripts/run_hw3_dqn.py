@@ -1,3 +1,9 @@
+import sys
+ 
+# setting path
+sys.path.append('C:\\Users\\scien\\OneDrive\\Desktop\\fa2022\\cs285\\homework_fall2022\\hw3')
+sys.path = sys.path[:6] + sys.path[7:]
+
 import os
 import time
 
@@ -55,6 +61,7 @@ def main():
     parser.add_argument('--num_agent_train_steps_per_iter', type=int, default=1)
     parser.add_argument('--num_critic_updates_per_agent_update', type=int, default=1)
     parser.add_argument('--double_q', action='store_true')
+    parser.add_argument('--gamma', type=float, default=1.0)
 
     parser.add_argument('--seed', type=int, default=1)
     parser.add_argument('--no_gpu', '-ngpu', action='store_true')
