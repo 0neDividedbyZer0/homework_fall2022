@@ -87,7 +87,7 @@ class MLPPolicySAC(MLPPolicy):
         q_min = torch.min(q_1, q_2).squeeze()
         log_probs = action_distribution.log_prob(actions).sum(dim=1)
 
-        actor_loss = (self.alpha * log_probs - q_min).mean()
+        actor_loss = (self.alpha.detach() * log_probs - q_min).mean()
         self.optimizer.zero_grad()
         actor_loss.backward()
         self.optimizer.step()

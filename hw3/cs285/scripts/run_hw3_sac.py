@@ -1,8 +1,7 @@
-import sys
+#import sys
  
-# setting path
-sys.path.append('C:\\Users\\scien\\OneDrive\\Desktop\\fa2022\\cs285\\homework_fall2022\\hw3')
-sys.path = sys.path[:6] + sys.path[7:]
+# setting path for my personal computer due to weird stuff
+#sys.path[6] = 'c:\\users\\scien\\onedrive\\desktop\\fa2022\\cs285\\homework_fall2022\\hw3'
 
 import os
 import time
