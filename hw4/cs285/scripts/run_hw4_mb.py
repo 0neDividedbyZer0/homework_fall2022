@@ -1,3 +1,7 @@
+import sys
+
+sys.path[6] = 'c:\\users\\scien\\onedrive\\desktop\\fa2022\\cs285\\homework_fall2022\\hw4'
+
 import os
 import time
 
