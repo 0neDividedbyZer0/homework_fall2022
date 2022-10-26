@@ -46,7 +46,7 @@ class MLPPolicySAC(MLPPolicy):
         observation = ptu.from_numpy(obs)
         action_distribution = self.forward(observation)
         if sample:
-            action = action_distribution.rsample(sample_shape=(self.ac_dim, ))
+            action = action_distribution.rsample()
         else:
             action = action_distribution.mean
         high, low = self.action_range[1], self.action_range[0]
@@ -55,6 +55,7 @@ class MLPPolicySAC(MLPPolicy):
         #print(high, low, range)
         #print('transformed_mu', (1. + action_distribution.mean) * range / 2. + low)
         #print((1. + action_distribution.mean) * range / 2. - low)
+        #print(action, action.shape, obs.shape, action_distribution.mean)
         return ptu.to_numpy(action)
 
     # This function defines the forward pass of the network.
